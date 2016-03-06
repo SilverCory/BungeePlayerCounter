@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -159,7 +160,7 @@ public class Pinger implements Runnable {
 
     @ToString
     public class PingResponse {
-        private JsonObject description;
+        private JsonElement description;
         @Getter
         private Players players;
         @Getter
@@ -170,7 +171,7 @@ public class Pinger implements Runnable {
         @Getter
         private int time;
 
-        public JsonObject getRawDescription() {
+        public JsonElement getRawDescription() {
             return description;
         }
 
