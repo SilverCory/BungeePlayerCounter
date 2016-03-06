@@ -7,13 +7,13 @@
 	<name>BungeePlayerCounter</name>
 
 	<properties>
-		<minecraft.version>1.8.3-R0.1-SNAPSHOT</minecraft.version>
+		<minecraft.version>1.9-R0.1-SNAPSHOT</minecraft.version>
 	</properties>
 
 	<repositories>
 		<repository>
 			<id>spigot-repo</id>
-			<url>http://repo.md-5.net/content/groups/public/</url>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 	</repositories>
 
@@ -22,8 +22,7 @@
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
 			<version>${minecraft.version}</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
