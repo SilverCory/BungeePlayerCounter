@@ -3,50 +3,39 @@ package fr.Alphart.BungeePlayerCounter.Servers;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
+import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import com.google.gson.Gson;
 
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
+
 import fr.Alphart.BungeePlayerCounter.BPC;
 import fr.Alphart.BungeePlayerCounter.Servers.Pinger.VarIntStreams.VarIntDataInputStream;
 import fr.Alphart.BungeePlayerCounter.Servers.Pinger.VarIntStreams.VarIntDataOutputStream;
 
 public class Pinger implements Runnable {
-    private static Gson gson;
+    private static final Gson gson = new Gson();
 	private InetSocketAddress address;
 	private String parentGroupName;
 	private boolean online = false;
 	private int maxPlayers = -1;
 
 	public Pinger(final String parentGroupName, final InetSocketAddress address) {
-	    if(gson == null){
-	        loadGson();
-	        try{
-	            gson = new Gson();
-	            BPC.debug("Gson was loaded with success !");
-	        }catch(final Throwable t){
-	            BPC.severe("Gson cannot be downloaded or loaded ... Please update to spigot 1.8.3 or earlier", t);
-	        }
-	    }
 		this.parentGroupName = parentGroupName;
 		this.address = address;
 	}
@@ -74,7 +63,8 @@ public class Pinger implements Runnable {
 			online = false;
 		}
 	}
-    public static PingResponse ping(final InetSocketAddress host, final int timeout) throws IOException{
+
+    public static PingResponse ping(final InetSocketAddress host, final int timeout) throws IOException{
         Socket socket = null;
         try{
             socket = new Socket();
@@ -130,7 +120,7 @@ public class Pinger implements Runnable {
             byte[] in = new byte[length];
             dataInputStream.readFully(in);
             String json = new String(in);
-            
+
             // Send ping packet (to get ping value in ms)
             long now = System.currentTimeMillis();
             dataOutputStream.writeByte(0x09);
@@ -166,72 +156,31 @@ public class Pinger implements Runnable {
             }
         }
     }
-    
-    public Gson loadGson(){
-        try{
-            Class.forName("com.google.gson.Gson");
-            return new Gson();
-        }catch(final Throwable t){
-            BPC.info("Gson wasn't found... Please update to spigot 1.8.3 or earlier."
-                    + "BPC will try to dynamically load it.");
-        }
-        final File bpcFolder = BPC.getInstance().getDataFolder();
-        final File gsonPath = new File(bpcFolder + File.separator + "lib" + File.separator
-                + "gson.jar");
-        new File(bpcFolder + File.separator + "lib").mkdir();
 
-        // Download the driver if it doesn't exist
-        if (!gsonPath.exists()) {
-            BPC.info("Gson was not found. It is being downloaded, please wait ...");
-
-            final String gsonDL = "https://repo1.maven.org/maven2/com/google/code/gson/gson/2.3.1/gson-2.3.1.jar";
-            FileOutputStream fos = null;
-            try {
-                final ReadableByteChannel rbc = Channels.newChannel(new URL(gsonDL).openStream());
-                fos = new FileOutputStream(gsonPath);
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-            } catch (final IOException e) {
-                BPC.severe("An error occured during the download of Gson.", e);
-                return null;
-            } finally {
-                if(fos != null){
-                    try {
-                        fos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            BPC.info("Gson has been successfully downloaded.");
-        }
-
-        try {
-            URLClassLoader systemClassLoader;
-            URL gsonUrl;
-            Class<URLClassLoader> sysclass;
-            gsonUrl = gsonPath.toURI().toURL();
-            systemClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            sysclass = URLClassLoader.class;
-            final Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class });
-            method.setAccessible(true);
-            method.invoke(systemClassLoader, new Object[] { gsonUrl });
-
-            return (Gson) Class.forName("com.google.gson.Gson", true, systemClassLoader).newInstance();
-        } catch (final Throwable t) {
-            BPC.severe("Gson cannot be loaded.", t);
-        }
-        return null;
-    }
-    
-    @Getter
     @ToString
     public class PingResponse {
-        private String description;
+        private JsonObject description;
+        @Getter
         private Players players;
+        @Getter
         private Version version;
+        @Getter
         private String favicon;
         @Setter
+        @Getter
         private int time;
+
+        public JsonObject getRawDescription() {
+            return description;
+        }
+
+        public String getDescription() {
+            return new TextComponent( getFancyDescription() ).toLegacyText();
+        }
+
+        public BaseComponent[] getFancyDescription() {
+            return ComponentSerializer.parse( description.toString() );
+        }
         
         public boolean isFull(){
             return players.max <= players.online;
