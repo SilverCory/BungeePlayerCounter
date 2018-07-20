@@ -7,7 +7,7 @@
     <name>BungeePlayerCounter</name>
 
     <properties>
-        <minecraft.version>1.9-R0.1-SNAPSHOT</minecraft.version>
+        <minecraft.version>1.13-pre7-R0.1-SNAPSHOT</minecraft.version>
     </properties>
 
     <repositories>
