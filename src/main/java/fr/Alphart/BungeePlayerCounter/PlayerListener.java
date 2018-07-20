@@ -13,14 +13,14 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerJoin(final PlayerJoinEvent ev) {
         final ServerCoordinator serverCoordinator = BPC.getInstance().getServerCoordinator();
-        if(serverCoordinator.getCurrentServer().isEmpty() || serverCoordinator.getServerGroups().size() <= 1){
+        if (serverCoordinator.getCurrentServer().isEmpty() || serverCoordinator.getServerGroups().size() <= 1) {
             Bukkit.getScheduler().runTaskLater(BPC.getInstance(), new Runnable() {
                 @Override
                 public void run() {
-                    if(serverCoordinator.getCurrentServer().isEmpty()){
+                    if (serverCoordinator.getCurrentServer().isEmpty()) {
                         BPC.getInstance().getPmWriter().sendGetCurrentServerMessage(ev.getPlayer());
                     }
-                    if(serverCoordinator.getServerGroups().size() <= 1){
+                    if (serverCoordinator.getServerGroups().size() <= 1) {
                         BPC.getInstance().getPmWriter().sendGetServersListMessage(ev.getPlayer());
                     }
                 }
@@ -35,5 +35,5 @@ public class PlayerListener implements Listener {
             }
         }, 2L);
     }
-    
+
 }

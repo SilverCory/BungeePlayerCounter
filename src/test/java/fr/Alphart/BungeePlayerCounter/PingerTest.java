@@ -20,11 +20,11 @@ public class PingerTest {
     public void doPing() throws IOException {
 
         Pinger.PingResponse response = Pinger.ping(new InetSocketAddress("mc.hypixel.net", 25565), 20000);
-        Preconditions.checkNotNull( response );
+        Preconditions.checkNotNull(response);
 
-        System.out.println( "Description: " + response.getDescription() );
-        System.out.println( "Version: " + response.getVersion() );
-        System.out.println( "Playercount: " + response.getPlayers().getOnline() + "/" + response.getPlayers().getMax() );
+        System.out.println("Description: " + response.getDescription());
+        System.out.println("Version: " + response.getVersion());
+        System.out.println("Playercount: " + response.getPlayers().getOnline() + "/" + response.getPlayers().getMax());
 
     }
 

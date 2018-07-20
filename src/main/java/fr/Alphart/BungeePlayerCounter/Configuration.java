@@ -29,14 +29,14 @@ import fr.Alphart.BungeePlayerCounter.Servers.ServerGroup;
 public class Configuration {
     @Getter(value = AccessLevel.NONE)
     private final FileConfiguration config;
-    
-    public Configuration(final FileConfiguration config){
+
+    public Configuration(final FileConfiguration config) {
         this.config = config;
-        
+
         saveDefConfig();
         loadConfig();
     }
-    
+
     private String networkName;
     private boolean serverIndicatorEnabled;
     private String serverIndicator;
@@ -47,7 +47,7 @@ public class Configuration {
     private String offlinePrefix;
     private InetSocketAddress proxyAddress;
     private SetMultimap<String, ServerGroup> serversGroups;
-    
+
     private void saveDefConfig() {
         final BPC plugin = BPC.getInstance();
         if (!new File(plugin.getDataFolder(), "config.yml").exists()) {
@@ -80,47 +80,47 @@ public class Configuration {
             plugin.getConfig().set("serverIndicator", "&a>");
             plugin.getConfig().set("proxyIP", "127.0.0.1:25577");
         }
-        
+
         // Update the header
         final FileConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
                 new InputStreamReader(BPC.getInstance().getResource("config.yml"), Charsets.UTF_8));
         plugin.getConfig().options().header(defaultConfig.options().header());
-        
+
         plugin.saveConfig();
     }
 
-    private void loadConfig(){
+    private void loadConfig() {
         final Logger bpcLogger = BPC.getInstance().getLogger();
         // Get some config vars
         networkName = ChatColor.translateAlternateColorCodes('&', config.getString("name"));
         serverIndicatorEnabled = config.getBoolean("enableServerIndicator");
-        if(serverIndicatorEnabled){
+        if (serverIndicatorEnabled) {
             serverIndicator = ChatColor.translateAlternateColorCodes('&', config.getString("serverIndicator"));
         }
         automaticDisplay = config.getBoolean("automaticDisplay");
         updateInterval = config.getInt("interval");
-        
+
         onlinePrefix = ChatColor.translateAlternateColorCodes('&', config.getString("onlinePrefix"));
         offlinePrefix = ChatColor.translateAlternateColorCodes('&', config.getString("offlinePrefix"));
-        if(offlinePrefix.length() > 16){
+        if (offlinePrefix.length() > 16) {
             offlinePrefix = offlinePrefix.substring(0, 16);
             bpcLogger.warning("The offlinePrefix length is bigger than 16 chars...");
         }
-        if(onlinePrefix.length() > 16){
+        if (onlinePrefix.length() > 16) {
             onlinePrefix = onlinePrefix.substring(0, 16);
             bpcLogger.warning("The onlinePrefix length is bigger than 16 chars...");
         }
-        
-        if(!config.getString("proxyIP").isEmpty()){
+
+        if (!config.getString("proxyIP").isEmpty()) {
             final String strProxyIP = config.getString("proxyIP").replace("localhost", "127.0.0.1");
-            try{
+            try {
                 String[] addressArray = strProxyIP.split(":");
                 proxyAddress = new InetSocketAddress(InetAddress.getByName(addressArray[0]), Integer.parseInt(addressArray[1]));
             } catch (final IllegalArgumentException | UnknownHostException | ArrayIndexOutOfBoundsException e) {
                 bpcLogger.log(Level.WARNING, "The address of the bungee proxy is not correct. It must have the following format: 'ip:port'", e);
             }
         }
-        
+
         // Define channels used according to the datasource setting
         switch (config.getString("datasource")) {
             case "default":
@@ -134,7 +134,7 @@ public class Configuration {
                 config.set("datasource", "default");
                 break;
         }
-        
+
         serversGroups = HashMultimap.create();
         if (!automaticDisplay) {
             int groupNB = 0;
@@ -146,19 +146,19 @@ public class Configuration {
                     break;
                 }
                 ConfigurationSection groupConfig = config.getConfigurationSection("groups." + groupName);
-                
+
                 // Add the default ip field to the group
-                if(!groupConfig.contains("address")){
-                    groupConfig.set("address", "127.0.0.1:25565");  
+                if (!groupConfig.contains("address")) {
+                    groupConfig.set("address", "127.0.0.1:25565");
                 }
-                
+
                 // Only init group if it must be displayed
                 if (groupConfig.getBoolean("display")) {
                     String groupDisplayName = groupConfig.getString("displayName");
                     List<String> servers = Arrays.asList(groupConfig.getString("servers").split("\\+"));
                     InetSocketAddress address = null;
                     // Parse the address
-                    if(!groupConfig.getString("address").isEmpty()){
+                    if (!groupConfig.getString("address").isEmpty()) {
                         final String strAddress = groupConfig.getString("address").replace("localhost", "127.0.0.1");
                         String[] addressArray = strAddress.split(":");
                         try {
@@ -169,12 +169,12 @@ public class Configuration {
                     }
 
                     final ServerGroup group;
-                    if(address != null){
-                         group = new ServerGroup(groupDisplayName, servers, address, updateInterval);
-                    }else{
-                         group = new ServerGroup(groupDisplayName, servers);
+                    if (address != null) {
+                        group = new ServerGroup(groupDisplayName, servers, address, updateInterval);
+                    } else {
+                        group = new ServerGroup(groupDisplayName, servers);
                     }
-                    
+
                     for (String server : servers) {
                         serversGroups.put(server, group);
                     }
@@ -182,8 +182,8 @@ public class Configuration {
                 }
             }
         }
-        
+
         BPC.getInstance().saveConfig(); // Set change that have been made to correct misconfiguration
     }
-    
+
 }
